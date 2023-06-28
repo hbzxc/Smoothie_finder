@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html>
+<head>
+    
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+    
+        <script>
+            L_NO_TOUCH = false;
+            L_DISABLE_3D = false;
+        </script>
+    
+    <style>html, body {width: 100%;height: 100%;margin: 0;padding: 0;}</style>
+    <style>#map {position:absolute;top:0;bottom:0;right:0;left:0;}</style>
+    <script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.3/dist/leaflet.js"></script>
+    <script src="https://code.jquery.com/jquery-1.12.4.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Leaflet.awesome-markers/2.0.2/leaflet.awesome-markers.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.3/dist/leaflet.css"/>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/css/bootstrap.min.css"/>
+    <link rel="stylesheet" href="https://netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap.min.css"/>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.2.0/css/all.min.css"/>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/Leaflet.awesome-markers/2.0.2/leaflet.awesome-markers.css"/>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/python-visualization/folium/folium/templates/leaflet.awesome.rotate.min.css"/>
+    
+            <meta name="viewport" content="width=device-width,
+                initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+            <style>
+                #map_015df740e283b8d9b476be1f3ffbc84f {
+                    position: relative;
+                    width: 100.0%;
+                    height: 100.0%;
+                    left: 0.0%;
+                    top: 0.0%;
+                }
+                .leaflet-container { font-size: 1rem; }
+            </style>
+        
+</head>
+<body>
+    
+    
+    <div style="position: fixed; top: 10px; right: 10px; background-color: white; padding: 10px; border: 1px solid black; z-index: 9999;">
+        <h3>Distance to Smoothie</h3>
+        <p><strong>Distance:</strong> 4137.11 km</p>
+    </div>
+    
+    
+            <div class="folium-map" id="map_015df740e283b8d9b476be1f3ffbc84f" ></div>
+        
+</body>
+<script>
+    
+    
+            var map_015df740e283b8d9b476be1f3ffbc84f = L.map(
+                "map_015df740e283b8d9b476be1f3ffbc84f",
+                {
+                    center: [27.4977455, -137.895847],
+                    crs: L.CRS.EPSG3857,
+                    zoom: 10,
+                    zoomControl: true,
+                    preferCanvas: false,
+                }
+            );
+
+            
+
+        
+    
+            var tile_layer_8dca9493eff04c7f36434a658f02b581 = L.tileLayer(
+                "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
+                {"attribution": "Data by \u0026copy; \u003ca target=\"_blank\" href=\"http://openstreetmap.org\"\u003eOpenStreetMap\u003c/a\u003e, under \u003ca target=\"_blank\" href=\"http://www.openstreetmap.org/copyright\"\u003eODbL\u003c/a\u003e.", "detectRetina": false, "maxNativeZoom": 18, "maxZoom": 18, "minZoom": 0, "noWrap": false, "opacity": 1, "subdomains": "abc", "tms": false}
+            ).addTo(map_015df740e283b8d9b476be1f3ffbc84f);
+        
+    
+            var marker_597cdd5d81baa9310203246503cbe8fe = L.marker(
+                [21.2941, -157.8284],
+                {}
+            ).addTo(map_015df740e283b8d9b476be1f3ffbc84f);
+        
+    
+            var icon_0d7d0fc4d93b8f755d319064013aa4aa = L.AwesomeMarkers.icon(
+                {"extraClasses": "fa-rotate-0", "icon": "info-sign", "iconColor": "white", "markerColor": "blue", "prefix": "glyphicon"}
+            );
+            marker_597cdd5d81baa9310203246503cbe8fe.setIcon(icon_0d7d0fc4d93b8f755d319064013aa4aa);
+        
+    
+        var popup_564530862e5f587e4630c9b584c0b5aa = L.popup({"maxWidth": "100%"});
+
+        
+            
+                var html_3400680e70db72a05388f3ab0edd616e = $(`<div id="html_3400680e70db72a05388f3ab0edd616e" style="width: 100.0%; height: 100.0%;">User Location</div>`)[0];
+                popup_564530862e5f587e4630c9b584c0b5aa.setContent(html_3400680e70db72a05388f3ab0edd616e);
+            
+        
+
+        marker_597cdd5d81baa9310203246503cbe8fe.bindPopup(popup_564530862e5f587e4630c9b584c0b5aa)
+        ;
+
+        
+    
+    
+            var marker_b4602dd2ad2800612e7df84c1b48c3c2 = L.marker(
+                [33.701391, -117.963294],
+                {}
+            ).addTo(map_015df740e283b8d9b476be1f3ffbc84f);
+        
+    
+            var icon_83095271aa0ffb59baa41d88dbfcbfba = L.AwesomeMarkers.icon(
+                {"extraClasses": "fa-rotate-0", "icon": "info-sign", "iconColor": "white", "markerColor": "red", "prefix": "glyphicon"}
+            );
+            marker_b4602dd2ad2800612e7df84c1b48c3c2.setIcon(icon_83095271aa0ffb59baa41d88dbfcbfba);
+        
+    
+        var popup_8c72c65a7058844b236e19cb8757cb0f = L.popup({"maxWidth": "100%"});
+
+        
+            
+                var html_51faa52e2f64b1ed299bdbdc8c6f8ea0 = $(`<div id="html_51faa52e2f64b1ed299bdbdc8c6f8ea0" style="width: 100.0%; height: 100.0%;">'fountain-valley', 'ca'</div>`)[0];
+                popup_8c72c65a7058844b236e19cb8757cb0f.setContent(html_51faa52e2f64b1ed299bdbdc8c6f8ea0);
+            
+        
+
+        marker_b4602dd2ad2800612e7df84c1b48c3c2.bindPopup(popup_8c72c65a7058844b236e19cb8757cb0f)
+        ;
+
+        
+    
+    
+            var poly_line_eeb31c2bd1e1c8899da242e4b405b104 = L.polyline(
+                [[21.2941, -157.8284], [33.701391, -117.963294]],
+                {"bubblingMouseEvents": true, "color": "red", "dashArray": null, "dashOffset": null, "fill": false, "fillColor": "red", "fillOpacity": 0.2, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "noClip": false, "opacity": 1.0, "smoothFactor": 1.0, "stroke": true, "weight": 3}
+            ).addTo(map_015df740e283b8d9b476be1f3ffbc84f);
+        
+    
+            map_015df740e283b8d9b476be1f3ffbc84f.fitBounds(
+                [[21.2941, -157.8284], [33.701391, -117.963294]],
+                {}
+            );
+        
+</script>
+</html>

@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html>
+<head>
+    
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+    
+        <script>
+            L_NO_TOUCH = false;
+            L_DISABLE_3D = false;
+        </script>
+    
+    <style>html, body {width: 100%;height: 100%;margin: 0;padding: 0;}</style>
+    <style>#map {position:absolute;top:0;bottom:0;right:0;left:0;}</style>
+    <script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.3/dist/leaflet.js"></script>
+    <script src="https://code.jquery.com/jquery-1.12.4.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Leaflet.awesome-markers/2.0.2/leaflet.awesome-markers.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.3/dist/leaflet.css"/>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/css/bootstrap.min.css"/>
+    <link rel="stylesheet" href="https://netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap.min.css"/>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.2.0/css/all.min.css"/>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/Leaflet.awesome-markers/2.0.2/leaflet.awesome-markers.css"/>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/python-visualization/folium/folium/templates/leaflet.awesome.rotate.min.css"/>
+    
+            <meta name="viewport" content="width=device-width,
+                initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+            <style>
+                #map_6a73e4ee98b3ba7f5d52cca6519265a6 {
+                    position: relative;
+                    width: 100.0%;
+                    height: 100.0%;
+                    left: 0.0%;
+                    top: 0.0%;
+                }
+                .leaflet-container { font-size: 1rem; }
+            </style>
+        
+</head>
+<body>
+    
+    
+        <div style="position: fixed; top: 10px; right: 10px; background-color: white; padding: 10px; border: 1px solid black; z-index: 9999;">
+            <h3>Distance to Smoothie</h3>
+            <p><strong>Distance:</strong> 8539.94 km</p>
+        </div>
+        
+    
+            <div class="folium-map" id="map_6a73e4ee98b3ba7f5d52cca6519265a6" ></div>
+        
+</body>
+<script>
+    
+    
+            var map_6a73e4ee98b3ba7f5d52cca6519265a6 = L.map(
+                "map_6a73e4ee98b3ba7f5d52cca6519265a6",
+                {
+                    center: [50.19184909604336, -18.149453252257658],
+                    crs: L.CRS.EPSG3857,
+                    zoom: 10,
+                    zoomControl: true,
+                    preferCanvas: false,
+                }
+            );
+
+            
+
+        
+    
+            var tile_layer_ee35e8cb62da6fc83d8ca881b2d19a8e = L.tileLayer(
+                "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
+                {"attribution": "Data by \u0026copy; \u003ca target=\"_blank\" href=\"http://openstreetmap.org\"\u003eOpenStreetMap\u003c/a\u003e, under \u003ca target=\"_blank\" href=\"http://www.openstreetmap.org/copyright\"\u003eODbL\u003c/a\u003e.", "detectRetina": false, "maxNativeZoom": 18, "maxZoom": 18, "minZoom": 0, "noWrap": false, "opacity": 1, "subdomains": "abc", "tms": false}
+            ).addTo(map_6a73e4ee98b3ba7f5d52cca6519265a6);
+        
+    
+            var marker_79ea5336dbea1bc9eff3354f1d360b94 = L.marker(
+                [52.77014219208672, 85.90199849548469],
+                {}
+            ).addTo(map_6a73e4ee98b3ba7f5d52cca6519265a6);
+        
+    
+            var icon_22f7dad9e7245da39fe0c43e49c79d88 = L.AwesomeMarkers.icon(
+                {"extraClasses": "fa-rotate-0", "icon": "info-sign", "iconColor": "white", "markerColor": "blue", "prefix": "glyphicon"}
+            );
+            marker_79ea5336dbea1bc9eff3354f1d360b94.setIcon(icon_22f7dad9e7245da39fe0c43e49c79d88);
+        
+    
+        var popup_835235ca6e511bf5e2f99b2dc5a5d2db = L.popup({"maxWidth": "100%"});
+
+        
+            
+                var html_19551624db3f63e6abfa8b67e37da89a = $(`<div id="html_19551624db3f63e6abfa8b67e37da89a" style="width: 100.0%; height: 100.0%;">User Location</div>`)[0];
+                popup_835235ca6e511bf5e2f99b2dc5a5d2db.setContent(html_19551624db3f63e6abfa8b67e37da89a);
+            
+        
+
+        marker_79ea5336dbea1bc9eff3354f1d360b94.bindPopup(popup_835235ca6e511bf5e2f99b2dc5a5d2db)
+        ;
+
+        
+    
+    
+            var marker_9cfc0ddcaba2507f190e00f90826ad7b = L.marker(
+                [47.613556, -122.200905],
+                {}
+            ).addTo(map_6a73e4ee98b3ba7f5d52cca6519265a6);
+        
+    
+            var icon_709e7147547ce98665a3b567872cf368 = L.AwesomeMarkers.icon(
+                {"extraClasses": "fa-rotate-0", "icon": "info-sign", "iconColor": "white", "markerColor": "red", "prefix": "glyphicon"}
+            );
+            marker_9cfc0ddcaba2507f190e00f90826ad7b.setIcon(icon_709e7147547ce98665a3b567872cf368);
+        
+    
+        var popup_c49510601dc4b5e56bae8038cf0b9af2 = L.popup({"maxWidth": "100%"});
+
+        
+            
+                var html_7119a437b3a25fcf11da8af208acb79c = $(`<div id="html_7119a437b3a25fcf11da8af208acb79c" style="width: 100.0%; height: 100.0%;">'bellevue', 'wa', '10445-ne-4th-street'</div>`)[0];
+                popup_c49510601dc4b5e56bae8038cf0b9af2.setContent(html_7119a437b3a25fcf11da8af208acb79c);
+            
+        
+
+        marker_9cfc0ddcaba2507f190e00f90826ad7b.bindPopup(popup_c49510601dc4b5e56bae8038cf0b9af2)
+        ;
+
+        
+    
+    
+            var poly_line_73edfbf121b616d5cd6ce556573fb05b = L.polyline(
+                [[52.77014219208672, 85.90199849548469], [47.613556, -122.200905]],
+                {"bubblingMouseEvents": true, "color": "red", "dashArray": null, "dashOffset": null, "fill": false, "fillColor": "red", "fillOpacity": 0.2, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "noClip": false, "opacity": 1.0, "smoothFactor": 1.0, "stroke": true, "weight": 3}
+            ).addTo(map_6a73e4ee98b3ba7f5d52cca6519265a6);
+        
+    
+            map_6a73e4ee98b3ba7f5d52cca6519265a6.fitBounds(
+                [[52.77014219208672, 85.90199849548469], [47.613556, -122.200905]],
+                {}
+            );
+        
+</script>
+</html>

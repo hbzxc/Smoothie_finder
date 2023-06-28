@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Select Location</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+    <style>
+        #map {
+            height: 400px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Select Location</h1>
+
+    <div id="map"></div>
+
+    <form action="/" method="post">
+        <input type="hidden" id="lat" name="lat" value="">
+        <input type="hidden" id="lon" name="lon" value="">
+        <button type="submit">Generate Map</button>
+    </form>
+
+    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+    <script>
+        var map = L.map('map').setView(10);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors',
+            maxZoom: 18,
+        }).addTo(map);
+
+        var marker;
+
+        function onMapClick(e) {
+            if (marker) {
+                map.removeLayer(marker);
+            }
+            marker = L.marker(e.latlng).addTo(map);
+            document.getElementById('lat').value = e.latlng.lat;
+            document.getElementById('lon').value = e.latlng.lng;
+        }
+
+        map.on('click', onMapClick);
+    </script>
+</body>
+</html>

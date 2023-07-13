@@ -1,7 +1,10 @@
 import requests
+import os
 from SmoothieIngredients import*
 
 Coord_out = []
+
+debug = True
 
 def get_coordinates(api_key, address):
     url = "https://dev.virtualearth.net/REST/v1/Locations"
@@ -36,31 +39,47 @@ def read_locations_from_file(file_path):
     return locations
 
 # Bing Maps API key
-api_key = "AiLQA37u7FIMRMLkFuTAwl1wl0yv-zsQoVC1Dh7lIQjMeG7zrHN0xL86gqyAMuvN"
+#extract from the api file
+apiKeys = []
+with open('api.txt', 'r') as file:
+    for line in file:
+        apiKeys.append(line)
 
-# File path to the input text file
-input_file = "textOut.txt"
+#set the first item as the bing api key
+bingAPI = apiKeys[0]
 
-# Read locations from the input file
-locations = read_locations_from_file(input_file)
+#get a list of all txt files in the current directory
+current_directory = os.getcwd()
+txt_files = [file for file in os.listdir(current_directory) if file.endswith('.txt')]
 
-# Process each location and get the coordinates
-for state_abbreviation, town_name, address in locations:
-    full_address = f"{address}, {town_name}, {state_abbreviation}, United States"
+#skip the api file and check the other text files for locations
+for file in txt_files:
+    if file != "api.txt":
 
-    if "-" in town_name:
-        print("This town contains a hypen in its name: "+town_name)
-        coordinates = get_coordinates(api_key, full_address)
-        if coordinates:
-            latitude, longitude = coordinates
-            print(f"Location: {town_name}, {state_abbreviation}")
-            print(f"Address: {address}")
-            print(f"Latitude: {latitude}")
-            print(f"Longitude: {longitude}")
-            print()
-            Coord_out.append([state_abbreviation, town_name, address, latitude, longitude])
-        else:
-            print(f"Coordinates not found for: {town_name}, {state_abbreviation}")
-            print()
+        #set the name of the output file
+        out_name = file.split("Out")[0]+"_Locations.txt"
 
-export_list_to_text_file(Coord_out, "LocAndCordExtra.txt")
+        # Read locations from the input file
+        locations = read_locations_from_file(file)
+
+        # Process each location and get the coordinates
+        for state_abbreviation, town_name, address in locations:
+            full_address = f"{address}, {town_name}, {state_abbreviation}, United States"
+
+            if "-" in town_name:
+                if debug == True:
+                    print("This town contains a hypen in its name: "+town_name)
+            coordinates = get_coordinates(bingAPI, full_address)
+            if coordinates:
+                latitude, longitude = coordinates
+                if debug == True:
+                    print(f"Location: {town_name}, {state_abbreviation}")
+                    print(f"Address: {address}")
+                    print(f"Latitude: {latitude}")
+                    print(f"Longitude: {longitude}")
+                Coord_out.append([state_abbreviation, town_name, address, latitude, longitude])
+            else:
+                print(f"Coordinates not found for: {town_name}, {state_abbreviation}")
+
+        export_list_to_text_file(Coord_out, out_name)
+

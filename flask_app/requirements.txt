@@ -1,0 +1,7 @@
+flask
+flask_assets
+folium
+geocoder
+urllib.request
+json
+math

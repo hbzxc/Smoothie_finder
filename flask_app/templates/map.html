@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Map</title>
+    <style>
+        body {
+            overflow: hidden;
+            margin: 0;
+            padding: 0;
+            background-color: #4b4875fd;
+        }
+
+        h1 {
+            text-align: center;
+            padding: 20px;
+            margin-top: 0;
+            color: white;
+        }
+
+        #map {
+            height: 70%; /* Adjust the height as needed */
+            width: 70%; /* Set the same value as the height */
+            margin: auto;
+        }
+
+        #overlay {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 999;
+        }
+
+        .back-button {
+            background-color: #fbff01;
+            color: rgb(0, 0, 0);
+            padding: 10px 20px;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+
+        .back-button:hover {
+            background-color: #bbbe02;
+        }
+    </style>
+</head>
+<body>
+    <div id="content">
+        <div id="header">
+            <h1>{{franchise}} Zone</h1>
+        </div>
+        <div id="overlay">
+            <button onclick="goBack()" class="back-button">Back to map</button>
+        </div>
+        <div id="map">
+            {{ map_html | safe }}
+        </div>
+    </div>
+
+    <script>
+        function goBack() {
+            window.history.back();
+        }
+    </script>
+</body>
+</html>

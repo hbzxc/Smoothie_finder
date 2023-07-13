@@ -1,13 +1,17 @@
+# scrape smoothie websites to get addresses and output as a list
 import requests
 from SmoothieIngredients import*
 from bs4 import BeautifulSoup
 
-# URL of the webpage to scrape
-url = "https://locations.tropicalsmoothiecafe.com/index.html"
+# URL of the webpages to scrape
+smoothie = [
+    ("tropical_smoothie", "https://locations.tropicalsmoothiecafe.com/index.html"),
+    ("Jamba", "https://locations.jamba.com/"),
+    ("Smoothie_King" , "https://locations.smoothieking.com/site-map/us/")
+    ]
 
+enable_prints = True
 single_test = False
-
-Location_list = []
 
 # List of US states and their abbreviations
 us_states = [
@@ -63,26 +67,45 @@ us_states = [
     ("Wyoming", "WY")
 ]
 
-# Send a GET request to the webpage
-response = requests.get(url)
+for smoothies in smoothie:
+    Location_list = []
 
-# Create a BeautifulSoup object to parse the HTML content
-soup = BeautifulSoup(response.content, "html.parser")
+    if enable_prints:
+        print(f"---------Now Checking {smoothies[0]}---------")
 
-# Find all the <a> tags containing the state names
-state_tags = soup.find_all("a", class_="Directory-listLink")
+    # Send a GET request to the webpage
+    response = requests.get(smoothies[1])
 
-# Extract the text content from the <a> tags and filter for US state names
-found_states = [tag.text for tag in state_tags if tag.text in [state[0] for state in us_states]]
+    # Create a BeautifulSoup object to parse the HTML content
+    soup = BeautifulSoup(response.content, "html.parser")
 
-if single_test:
-    abbreviation = [abbrev for name, abbrev in us_states if name == found_states[29]][0]
-    state_abbreviation(url, abbreviation, Location_list)
+    # Find all the <a> tags containing the state names and check if it is the smoothie king website
+    state_tags = soup.find_all("a", class_="Directory-listLink")
+    if state_tags == []:
+        for li in soup.find_all('li'):
+            state_tags.append(li)
+            King = True
+    else:
+        King = False
 
-if single_test == False:
-    for state in found_states:
-        abbreviation = [abbrev for name, abbrev in us_states if name == state][0]
-        state_abbreviation(url, abbreviation, Location_list)
+    #print("found all a tags")
+    #print(state_tags)
 
-export_list_to_text_file(Location_list, "textOut.txt")
+    # Extract the text content from the <a> tags and filter for US state names
+    found_states = [tag.text for tag in state_tags if tag.text in [state[0] for state in us_states]]
 
+    #for testing single output
+    if single_test:
+        abbreviation = [abbrev for name, abbrev in us_states if name == found_states[0]][0]
+        state_abbreviation(smoothies[1], abbreviation, Location_list, King)
+        #print(smoothies[1])
+        #print(abbreviation)
+        #print(Location_list)
+
+    if single_test == False:
+        for state in found_states:
+            abbreviation = [abbrev for name, abbrev in us_states if name == state][0]
+            state_abbreviation(smoothies[1], abbreviation, Location_list, King)
+
+    name_out = str(smoothies[0])+"Out.txt"
+    export_list_to_text_file(Location_list, name_out)

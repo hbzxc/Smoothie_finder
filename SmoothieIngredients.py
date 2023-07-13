@@ -1,13 +1,17 @@
 import requests
+import re
 from bs4 import BeautifulSoup
 
 # Toggle flag for print statements
-enable_prints = False
+enable_prints = True
 
-def state_abbreviation(base_url, state_abbreviation, Location_list):
+def state_abbreviation(base_url, state_abbreviation, Location_list, King):
     stripped_url = base_url.split("index")
     url = stripped_url[0] + state_abbreviation.lower()
-    town_names(url, Location_list)
+    if King:
+        town_names_king(url, Location_list)
+    else:
+        town_names(url, Location_list)
 
 def town_names(state_url, Location_list):
     response = requests.get(state_url)
@@ -34,6 +38,38 @@ def town_names(state_url, Location_list):
             multiple_locations(state_url + "/" + state.lower(), Location_list)
             if enable_prints:
                 print("----------Multiple locations end----------")
+
+def town_names_king(state_url, Location_list):
+    response = requests.get(state_url)
+    soup = BeautifulSoup(response.content, "html.parser")
+
+    desired_links = [state_url + "/" + a_tag.text.lower().replace(" ", "-") + "/" for a_tag in soup.select("li a[href*='/site-map']")]
+
+    for link in desired_links:
+        try:
+            town_link = requests.get(link)
+            town_soup = BeautifulSoup(town_link.content, "html.parser")
+            town_tags = town_soup.find_all('li')
+
+            for tag in town_tags:
+                a_elements = tag.select("a[href*='smoothieking.com/ll/us/']")
+                for element in a_elements:
+                    href_url = element['href'].split("/")
+
+                    address = href_url[-2]
+                    town = href_url[-3]
+                    state = href_url[-4]
+
+                    if enable_prints:
+                        print("------------New Location found------------")
+                        print("This is the town name: ", town)
+                        print("This is the address: ", address)
+                        print("This is the state: ", state)
+
+                    Location_list.append([state.lower(), town, address])
+
+        except requests.exceptions.RequestException:
+            print("Invalid URL for: " + link)
 
 def multiple_locations(multi_url, Location_list):
 

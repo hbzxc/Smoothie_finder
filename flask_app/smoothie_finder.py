@@ -10,7 +10,6 @@ from db import (
     markers_for_franchise,
 )
 import folium
-import geocoder
 
 app = Flask(__name__)
 app.static_folder = 'static'
@@ -160,15 +159,6 @@ def route_to():
 
     route_map = m._repr_html_()
     return render_template('map.html', map_html=route_map, franchise=franchise)
-
-
-@app.route('/current_location')
-def get_current_location():
-    ip_addr = request.environ.get('HTTP_X_FORWARDED_FOR', request.remote_addr)
-    g = geocoder.ip(ip_addr)
-    if g.latlng:
-        return jsonify({'lat': g.latlng[0], 'lon': g.latlng[1]})
-    return jsonify({'error': 'Unable to retrieve current location'})
 
 
 if __name__ == '__main__':

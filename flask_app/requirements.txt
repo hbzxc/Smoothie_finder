@@ -1,6 +1,5 @@
 flask
 folium
-geocoder
 requests
 beautifulsoup4
 lxml

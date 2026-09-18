@@ -1,7 +1,6 @@
 flask
-flask_assets
 folium
 geocoder
-urllib.request
-json
-math
+requests
+beautifulsoup4
+lxml

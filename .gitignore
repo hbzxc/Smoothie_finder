@@ -1,2 +1,5 @@
 api.txt
-/_pycache_
+flask_app/api.txt
+__pycache__/
+*.pyc
+.venv/

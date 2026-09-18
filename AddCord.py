@@ -1,85 +1,159 @@
-import requests
+"""
+Geocode address-only *Out.txt files.
+
+Uses Azure Maps when flask_app/api.txt (or AZURE_MAPS_KEY) is set;
+otherwise falls back to Nominatim.
+
+Examples:
+  python AddCord.py --file JambaOut.txt
+  python AddCord.py --all --copy-to-flask
+"""
+
+from __future__ import annotations
+
+import argparse
 import os
-from SmoothieIngredients import*
+import shutil
+from pathlib import Path
 
-Coord_out = []
+from SmoothieIngredients import (
+    HttpClient,
+    export_list_to_text_file,
+    get_coordinates,
+)
 
-debug = True
+OUT_TO_LOCATIONS = {
+    "tropical_smoothieOut.txt": ("tropical_smoothie_Locations.txt", "TropicalLocations.txt"),
+    "JambaOut.txt": ("Jamba_Locations.txt", "Jamba_Locations.txt"),
+    "Smoothie_KingOut.txt": ("Smoothie_King_Locations.txt", "Smoothie_King_Locations.txt"),
+}
 
-def get_coordinates(api_key, address):
-    url = "https://dev.virtualearth.net/REST/v1/Locations"
-    params = {
-        "q": address,
-        "key": api_key
-    }
-    response = requests.get(url, params=params)
-    data = response.json()
 
-    if response.status_code == 200 and data["statusCode"] == 200:
-        resources = data["resourceSets"][0]["resources"]
-        if resources:
-            point = resources[0]["point"]
-            latitude = point["coordinates"][0]
-            longitude = point["coordinates"][1]
-            return latitude, longitude
-    return None
+def parse_args():
+    parser = argparse.ArgumentParser(description="Add coordinates to scraped location lists")
+    parser.add_argument("--file", help="Single *Out.txt file to geocode")
+    parser.add_argument("--all", action="store_true", help="Geocode all known *Out.txt files")
+    parser.add_argument("--limit", type=int, default=0, help="Only process first N rows")
+    parser.add_argument("--copy-to-flask", action="store_true", help="Copy results into flask_app/")
+    parser.add_argument("--quiet", action="store_true")
+    return parser.parse_args()
 
-def read_locations_from_file(file_path):
-    with open(file_path, "r") as file:
-        lines = file.readlines()
-    
+
+def read_locations_from_file(file_path: Path) -> list:
+    import ast
+
     locations = []
-    for line in lines:
-        location_data = line.strip()[1:-1].split(", ")
-        state_abbreviation = location_data[0].strip("'")
-        town_name = location_data[1].strip("'")
-        address = location_data[2].strip("'")
-        locations.append((state_abbreviation, town_name, address))
-    
+    with open(file_path, "r", encoding="utf-8") as file:
+        for line in file:
+            line = line.strip()
+            if not line:
+                continue
+            try:
+                cleaned = list(ast.literal_eval(line))
+            except (ValueError, SyntaxError):
+                raw = line[1:-1].split(", ")
+                cleaned = [part.strip().strip("'\"") for part in raw]
+            if len(cleaned) < 3:
+                continue
+            locations.append(cleaned)
     return locations
 
-# Bing Maps API key
-#extract from the api file
-apiKeys = []
-with open('api.txt', 'r') as file:
-    for line in file:
-        apiKeys.append(line)
 
-#set the first item as the bing api key
-bingAPI = apiKeys[0]
+def human_address(state: str, town: str, address: str) -> str:
+    town_h = town.replace("-", " ")
+    address_h = address.replace("-", " ")
+    return f"{address_h}, {town_h}, {state}, United States"
 
-#get a list of all txt files in the current directory
-current_directory = os.getcwd()
-txt_files = [file for file in os.listdir(current_directory) if file.endswith('.txt')]
 
-#skip the api file and check the other text files for locations
-for file in txt_files:
-    if file != "api.txt":
+def process_file(path: Path, client: HttpClient, args, azure_maps_key: str = "") -> list:
+    verbose = not args.quiet
+    rows = read_locations_from_file(path)
+    if args.limit:
+        rows = rows[: args.limit]
 
-        #set the name of the output file
-        out_name = file.split("Out")[0]+"_Locations.txt"
+    output = []
+    for row in rows:
+        state, town, address = row[0], row[1], row[2]
+        existing_hours = row[5] if len(row) >= 6 else None
+        if len(row) >= 5:
+            try:
+                entry = [state, town, address, float(row[3]), float(row[4])]
+                if existing_hours:
+                    entry.append(existing_hours)
+                output.append(entry)
+                if verbose:
+                    print(f"Already geocoded: {town}, {state}")
+                continue
+            except (ValueError, TypeError):
+                pass
 
-        # Read locations from the input file
-        locations = read_locations_from_file(file)
+        query = human_address(state, town, address)
+        coords = get_coordinates(client, query, azure_maps_key=azure_maps_key)
+        if coords:
+            lat, lon = coords
+            entry = [state, town, address, lat, lon]
+            if existing_hours:
+                entry.append(existing_hours)
+            output.append(entry)
+            if verbose:
+                print(f"OK {town}, {state}: {lat}, {lon}")
+        else:
+            print(f"Coordinates not found for: {town}, {state} ({query})")
+    return output
 
-        # Process each location and get the coordinates
-        for state_abbreviation, town_name, address in locations:
-            full_address = f"{address}, {town_name}, {state_abbreviation}, United States"
 
-            if "-" in town_name:
-                if debug == True:
-                    print("This town contains a hypen in its name: "+town_name)
-            coordinates = get_coordinates(bingAPI, full_address)
-            if coordinates:
-                latitude, longitude = coordinates
-                if debug == True:
-                    print(f"Location: {town_name}, {state_abbreviation}")
-                    print(f"Address: {address}")
-                    print(f"Latitude: {latitude}")
-                    print(f"Longitude: {longitude}")
-                Coord_out.append([state_abbreviation, town_name, address, latitude, longitude])
-            else:
-                print(f"Coordinates not found for: {town_name}, {state_abbreviation}")
+def load_azure_key() -> str:
+    env_key = os.environ.get("AZURE_MAPS_KEY", "").strip()
+    if env_key:
+        return env_key
+    for candidate in (Path("flask_app") / "api.txt", Path("api.txt")):
+        if candidate.exists():
+            for line in candidate.read_text(encoding="utf-8").splitlines():
+                if line.strip():
+                    return line.strip()
+    return ""
 
-        export_list_to_text_file(Coord_out, out_name)
 
+def main():
+    args = parse_args()
+    azure_maps_key = load_azure_key()
+    # Azure can handle faster requests than Nominatim's 1 req/sec guidance
+    client = HttpClient(delay=0.2 if azure_maps_key else 1.05)
+    if azure_maps_key:
+        print("Using Azure Maps for geocoding")
+    else:
+        print("No Azure Maps key found; using Nominatim")
+
+    if args.file:
+        targets = [Path(args.file)]
+    elif args.all:
+        targets = [Path(name) for name in OUT_TO_LOCATIONS if Path(name).exists()]
+    else:
+        # Default: every *Out.txt in the current directory
+        targets = sorted(Path(".").glob("*Out.txt"))
+
+    if not targets:
+        print("No input *Out.txt files found.")
+        return
+
+    for path in targets:
+        if not path.exists():
+            print(f"Missing file: {path}")
+            continue
+        print(f"--- Geocoding {path} ---")
+        results = process_file(path, client, args, azure_maps_key=azure_maps_key)
+
+        mapping = OUT_TO_LOCATIONS.get(path.name)
+        out_name = mapping[0] if mapping else path.name.replace("Out.txt", "_Locations.txt")
+        out_path = Path(out_name)
+        export_list_to_text_file(results, out_path)
+        print(f"Wrote {len(results)} rows -> {out_path}")
+
+        if args.copy_to_flask and mapping:
+            flask_path = Path("flask_app") / mapping[1]
+            shutil.copyfile(out_path, flask_path)
+            print(f"Copied to {flask_path}")
+
+
+if __name__ == "__main__":
+    main()

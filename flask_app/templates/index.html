@@ -3,9 +3,10 @@
 <head>
     <title>Smoothie Finder</title>
     <link rel="icon" href="{{ url_for('static', filename='smooth.ico') }}" type="image/x-icon">
-    {% assets "css_all" %}
-        <link rel="stylesheet" href="{{ ASSET_URL }}">
-    {% endassets %}
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet.locatecontrol/dist/L.Control.Locate.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.markercluster/1.5.1/MarkerCluster.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.markercluster/1.5.1/MarkerCluster.Default.css">
     <style>
         body {
             margin: 0;
@@ -263,9 +264,9 @@
     </div>
 
 
-    {% assets "js_all" %}
-        <script src="{{ ASSET_URL }}"></script>
-    {% endassets %}
+    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+    <script src="https://unpkg.com/leaflet.locatecontrol/dist/L.Control.Locate.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.markercluster/1.5.1/leaflet.markercluster.js"></script>
 
     <script>
         var map = L.map('map').setView([38.61, -99.58], 4);
@@ -371,74 +372,106 @@
             }
         }); // Create marker cluster group for jamba juice
 
-        document.getElementById('smoothieLocationsBtn').addEventListener('click', function () {
-            var toggleText = document.getElementById('smoothieLocationsBtn');
-            if (smoothieMarkers.length === 0) {
-                var smoothieLocations = {{input_coordinates|tojson}};
+        function storePopupHtml(store, updatedAt) {
+            var hours = store.hours || 'Hours unavailable';
+            var updated = store.updated || updatedAt || 'unknown';
+            return '<div style="min-width:180px">' +
+                '<strong>Address</strong><br>' + store.address + '<br><br>' +
+                '<strong>Hours</strong><br>' + hours + '<br><br>' +
+                '<span style="color:#555;font-size:12px">Data updated: ' + updated + '</span>' +
+                '</div>';
+        }
 
-                for (var i = 0; i < smoothieLocations.length; i++) {
-                    var marker = L.marker(smoothieLocations[i], { icon: orangeIcon });
-                    markerClusterGroup.addLayer(marker); // Add marker to the cluster group
-                    smoothieMarkers.push(marker);
-                }
-                toggleText.textContent = "Hide All Tropical Smoothie Cafe Locations";
-
-                map.addLayer(markerClusterGroup); // Add the cluster group to the map
-            } else {
-                map.removeLayer(markerClusterGroup);
-                for (var i = 0; i < smoothieMarkers.length; i++) {
-                    map.removeLayer(smoothieMarkers[i]);
-                }
-                smoothieMarkers = [];
-                toggleText.textContent = "Show All Tropical Smoothie Cafe Locations";
+        function addStoreMarkers(stores, icon, clusterGroup, markerList, updatedAt) {
+            for (var i = 0; i < stores.length; i++) {
+                var store = stores[i];
+                var marker = L.marker([store.lat, store.lon], { icon: icon });
+                marker.bindPopup(storePopupHtml(store, updatedAt));
+                clusterGroup.addLayer(marker);
+                markerList.push(marker);
             }
+        }
+
+        // Cache fetched franchise marker payloads in-memory for this page session
+        var locationCache = {};
+
+        function loadFranchiseMarkers(franchiseKey, icon, clusterGroup, markerList, button, showLabel, hideLabel) {
+            if (markerList.length > 0) {
+                map.removeLayer(clusterGroup);
+                clusterGroup.clearLayers();
+                markerList.length = 0;
+                button.textContent = showLabel;
+                return;
+            }
+
+            button.disabled = true;
+            button.textContent = 'Loading...';
+
+            var apply = function (payload) {
+                addStoreMarkers(payload.locations, icon, clusterGroup, markerList, payload.updated);
+                map.addLayer(clusterGroup);
+                button.textContent = hideLabel;
+                button.disabled = false;
+            };
+
+            if (locationCache[franchiseKey]) {
+                apply(locationCache[franchiseKey]);
+                return;
+            }
+
+            fetch('/api/locations/' + franchiseKey)
+                .then(function (response) {
+                    if (!response.ok) {
+                        throw new Error('Failed to load locations');
+                    }
+                    return response.json();
+                })
+                .then(function (payload) {
+                    locationCache[franchiseKey] = payload;
+                    apply(payload);
+                })
+                .catch(function (error) {
+                    console.error(error);
+                    button.textContent = showLabel;
+                    button.disabled = false;
+                    alert('Could not load store locations. Please try again.');
+                });
+        }
+
+        document.getElementById('smoothieLocationsBtn').addEventListener('click', function () {
+            loadFranchiseMarkers(
+                'tropical',
+                orangeIcon,
+                markerClusterGroup,
+                smoothieMarkers,
+                this,
+                'Show All Tropical Smoothie Cafe Locations',
+                'Hide All Tropical Smoothie Cafe Locations'
+            );
         });
 
         document.getElementById('smoothieLocationsJambaBtn').addEventListener('click', function () {
-            var toggleText = document.getElementById('smoothieLocationsJambaBtn');
-            if (smoothieMarkers_jamba.length === 0) {
-                var smoothieLocations_jamba = {{input_coordinates_jamba|tojson}};
-
-                for (var i = 0; i < smoothieLocations_jamba.length; i++) {
-                    var marker = L.marker(smoothieLocations_jamba[i], { icon: greenIcon });
-                    markerClusterGroup_Jamba.addLayer(marker); // Add marker to the cluster group
-                    smoothieMarkers_jamba.push(marker);
-                }
-                toggleText.textContent = "Hide All Jamba Juice Locations";
-
-                map.addLayer(markerClusterGroup_Jamba); // Add the cluster group to the map
-            } else {
-                map.removeLayer(markerClusterGroup_Jamba);
-                for (var i = 0; i < smoothieMarkers_jamba.length; i++) {
-                    map.removeLayer(smoothieMarkers_jamba[i]);
-                }
-                smoothieMarkers_jamba = [];
-                toggleText.textContent = "Show All Jamba Juice Locations";
-            }
+            loadFranchiseMarkers(
+                'jamba',
+                greenIcon,
+                markerClusterGroup_Jamba,
+                smoothieMarkers_jamba,
+                this,
+                'Show All Jamba Juice Locations',
+                'Hide All Jamba Juice Locations'
+            );
         });
 
-
         document.getElementById('smoothieLocationsSmoothieKingBtn').addEventListener('click', function () {
-            var toggleText = document.getElementById('smoothieLocationsSmoothieKingBtn');
-            if (smoothieMarkers_smoothie_king.length === 0) {
-                var smoothieLocations_smoothie_king = {{input_coordinates_smoothie_king|tojson}};
-
-                for (var i = 0; i < smoothieLocations_smoothie_king.length; i++) {
-                    var marker = L.marker(smoothieLocations_smoothie_king[i], { icon: redIcon });
-                    markerClusterGroup_smoothie_king.addLayer(marker); // Add marker to the cluster group
-                    smoothieMarkers_smoothie_king.push(marker);
-                }
-                toggleText.textContent = "Hide All Smoothie King Locations";
-
-                map.addLayer(markerClusterGroup_smoothie_king); // Add the cluster group to the map
-            } else {
-                map.removeLayer(markerClusterGroup_smoothie_king);
-                for (var i = 0; i < smoothieMarkers_smoothie_king.length; i++) {
-                    map.removeLayer(smoothieMarkers_smoothie_king[i]);
-                }
-                smoothieMarkers_smoothie_king = [];
-                toggleText.textContent = "Show All Smoothie King Locations";
-            }
+            loadFranchiseMarkers(
+                'king',
+                redIcon,
+                markerClusterGroup_smoothie_king,
+                smoothieMarkers_smoothie_king,
+                this,
+                'Show All Smoothie King Locations',
+                'Hide All Smoothie King Locations'
+            );
         });
 
     </script>
